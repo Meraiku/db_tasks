@@ -1,9 +1,9 @@
 -- +goose Up
 CREATE TABLE IF NOT EXISTS employees(
-  id UUID PRIMARY KEY,
+  id SERIAL PRIMARY KEY,
   first_name VARCHAR(255) NOT NULL,
   last_name VARCHAR(255) NOT NULL,
-  department_id UUID NOT NULL REFERENCES departments(id)
+  department_id SERIAL NOT NULL REFERENCES departments(id)
 );
 
 -- +goose Down

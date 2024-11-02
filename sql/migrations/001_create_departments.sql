@@ -1,6 +1,6 @@
 -- +goose Up
 CREATE TABLE IF NOT EXISTS departments(
-  id UUID PRIMARY KEY,
+  id SERIAL PRIMARY KEY,
   title VARCHAR(255) NOT NULL
 );
 
