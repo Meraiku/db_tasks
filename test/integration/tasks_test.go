@@ -23,14 +23,38 @@ func TestTasks(t *testing.T) {
 	}{
 		{
 			testName:    "Выполнение SQL-запросово",
-			testFunc:    db.FirstTask,
+			testFunc:    db.SelectTask,
 			expectError: false,
 		},
 		{
 			testName:    "Использование параметров в SQL-запросе",
-			testFunc:    db.ThirdTask,
+			testFunc:    db.ParamsTask,
 			expectError: false,
 			args:        []any{1},
+		},
+		{
+			testName:    "Неправильные параметры в SQL-запросе",
+			testFunc:    db.ParamsTask,
+			expectError: true,
+			args:        []any{-1},
+		},
+		{
+			testName:    "Вставка данных в базу",
+			testFunc:    db.InsertTask,
+			expectError: false,
+			args:        []any{"John", "Doe", 1},
+		},
+		{
+			testName:    "Обновление данных в базе",
+			testFunc:    db.UpdateTask,
+			expectError: false,
+			args:        []any{"John", "Doe", 1},
+		},
+		{
+			testName:    "Транзакция",
+			testFunc:    db.TransactionTask,
+			expectError: false,
+			args:        []any{"IT", "John", "Doe"},
 		},
 	}
 
