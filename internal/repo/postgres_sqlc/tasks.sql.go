@@ -9,6 +9,42 @@ import (
 	"context"
 )
 
+const taskEightJoin = `-- name: TaskEightJoin :many
+SELECT
+  e.first_name,
+  e.last_name,
+  d.title AS department
+FROM employees e
+INNER JOIN departments d ON e.department_id = d.id
+ORDER BY d.title
+`
+
+type TaskEightJoinRow struct {
+	FirstName  string
+	LastName   string
+	Department string
+}
+
+func (q *Queries) TaskEightJoin(ctx context.Context) ([]TaskEightJoinRow, error) {
+	rows, err := q.db.Query(ctx, taskEightJoin)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []TaskEightJoinRow
+	for rows.Next() {
+		var i TaskEightJoinRow
+		if err := rows.Scan(&i.FirstName, &i.LastName, &i.Department); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const taskFiveDeleteProject = `-- name: TaskFiveDeleteProject :exec
 DELETE FROM projects
 WHERE id = 2
@@ -19,11 +55,46 @@ func (q *Queries) TaskFiveDeleteProject(ctx context.Context) error {
 	return err
 }
 
+const taskSevenAggFunc = `-- name: TaskSevenAggFunc :many
+SELECT 
+	d.title AS department,
+  COUNT(e.id) AS total_employees
+FROM employees e
+INNER JOIN departments d ON e.department_id = d.id
+GROUP BY d.title
+ORDER BY total_employees DESC
+`
+
+type TaskSevenAggFuncRow struct {
+	Department     string
+	TotalEmployees int64
+}
+
+func (q *Queries) TaskSevenAggFunc(ctx context.Context) ([]TaskSevenAggFuncRow, error) {
+	rows, err := q.db.Query(ctx, taskSevenAggFunc)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []TaskSevenAggFuncRow
+	for rows.Next() {
+		var i TaskSevenAggFuncRow
+		if err := rows.Scan(&i.Department, &i.TotalEmployees); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const taskThreeGetITEmployees = `-- name: TaskThreeGetITEmployees :many
-SELECT (first_name, last_name) AS full_name
-FROM employees
-INNER JOIN departments ON employees.department_id = departments.id
-WHERE departments.title = 'IT'
+SELECT CONCAT(first_name, ' ', last_name) AS full_name
+FROM employees e
+INNER JOIN departments d ON e.department_id = d.id
+WHERE d.title = 'IT'
 `
 
 func (q *Queries) TaskThreeGetITEmployees(ctx context.Context) ([]interface{}, error) {

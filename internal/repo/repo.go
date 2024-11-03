@@ -1,3 +1,7 @@
 package repo
 
-type Repository interface{}
+import "context"
+
+type Repository interface {
+	FirstTask(ctx context.Context) ([]Employee, error)
+}

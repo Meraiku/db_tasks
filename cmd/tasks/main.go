@@ -2,62 +2,34 @@ package main
 
 import (
 	"context"
-	"os"
+	"log"
 
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
-	"github.com/meraiku/db_tasks/internal/repo/postgres_sqlc"
+	"github.com/meraiku/db_tasks/internal/helpers"
+	postgressql "github.com/meraiku/db_tasks/internal/repo/postgres_sql"
+	"github.com/meraiku/db_tasks/internal/service/testing"
 )
 
 func main() {
 	godotenv.Load()
 	ctx := context.TODO()
-	pool, err := pgxpool.New(ctx, os.Getenv("POSTGRES_DSN"))
+
+	if err := helpers.ResetDB(ctx); err != nil {
+		log.Fatalf("failed to reset DB: %v", err)
+	}
+
+	if err := helpers.InsertData(ctx); err != nil {
+		log.Fatalf("failed to insert data in DB: %v", err)
+	}
+
+	db, err := postgressql.New(ctx)
 	if err != nil {
-		panic(err)
-	}
-	defer pool.Close()
-
-	queries := postgres_sqlc.New(pool)
-
-	_, err = queries.AddDepartment(ctx, "IT")
-	if err != nil {
-		panic(err)
-	}
-	queries.AddDepartment(ctx, "HR")
-	queries.AddDepartment(ctx, "Sales")
-
-	_, err = queries.AddEmployee(ctx, postgres_sqlc.AddEmployeeParams{
-		FirstName:    "John",
-		LastName:     "Doe",
-		DepartmentID: 1,
-	})
-	if err != nil {
-		panic(err)
+		log.Fatalf("failed to connect to DB: %v", err)
 	}
 
-	queries.AddEmployee(ctx, postgres_sqlc.AddEmployeeParams{
-		FirstName:    "Jane",
-		LastName:     "Doe",
-		DepartmentID: 1,
-	})
-
-	queries.AddEmployee(ctx, postgres_sqlc.AddEmployeeParams{
-		FirstName:    "Joe",
-		LastName:     "Doe",
-		DepartmentID: 2,
-	})
-
-	queries.AddEmployee(ctx, postgres_sqlc.AddEmployeeParams{
-		FirstName:    "Jill",
-		LastName:     "Doe",
-		DepartmentID: 3,
-	})
-
-	if err := queries.AddProject(ctx, "Project 1"); err != nil {
-		panic(err)
+	ts := testing.New(db)
+	if err := ts.Test(ctx); err != nil {
+		log.Fatalf("failed to test service: %v", err)
 	}
-	queries.AddProject(ctx, "Project 2")
-	queries.AddProject(ctx, "Project 3")
 
 }
