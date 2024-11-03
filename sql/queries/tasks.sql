@@ -1,8 +1,8 @@
 -- name: TaskThreeGetITEmployees :many
 SELECT CONCAT(first_name, ' ', last_name) AS full_name
-FROM employees
-INNER JOIN departments ON employees.department_id = departments.id
-WHERE departments.title = 'IT';
+FROM employees e
+INNER JOIN departments d ON e.department_id = d.id
+WHERE d.title = 'IT';
 
 -- name: TastFourSetEmployee :exec
 UPDATE employees
