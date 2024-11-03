@@ -15,9 +15,18 @@ WHERE id = 2;
 
 -- name: TaskSevenAggFunc :many
 SELECT 
-	departments.title AS department,
-  COUNT(employees.id) AS total_employees
-FROM employees
-INNER JOIN departments ON employees.department_id = departments.id
-GROUP BY departments.title
-ORDER BY total DESC;
+	d.title AS department,
+  COUNT(e.id) AS total_employees
+FROM employees e
+INNER JOIN departments d ON e.department_id = d.id
+GROUP BY d.title
+ORDER BY total_employees DESC;
+
+-- name: TaskEightJoin :many
+SELECT
+  e.first_name,
+  e.last_name,
+  d.title AS department
+FROM employees e
+INNER JOIN departments d ON e.department_id = d.id
+ORDER BY d.title;
