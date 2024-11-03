@@ -3,11 +3,10 @@ package main
 import (
 	"context"
 	"log"
+	"os/exec"
 
 	"github.com/joho/godotenv"
 	"github.com/meraiku/db_tasks/internal/helpers"
-	postgressql "github.com/meraiku/db_tasks/internal/repo/postgres_sql"
-	"github.com/meraiku/db_tasks/internal/service/testing"
 )
 
 func main() {
@@ -18,18 +17,21 @@ func main() {
 		log.Fatalf("failed to reset DB: %v", err)
 	}
 
+	log.Println("DB reset successfully")
+
 	if err := helpers.InsertData(ctx); err != nil {
 		log.Fatalf("failed to insert data in DB: %v", err)
 	}
 
-	db, err := postgressql.New(ctx)
+	log.Println("Data inserted successfully")
+
+	cmds := exec.CommandContext(ctx, "make", "tests")
+
+	out, err := cmds.Output()
 	if err != nil {
-		log.Fatalf("failed to connect to DB: %v", err)
+		log.Println(string(out))
+		log.Fatal("Tests failed :(")
 	}
 
-	ts := testing.New(db)
-	if err := ts.Test(ctx); err != nil {
-		log.Fatalf("failed to test service: %v", err)
-	}
-
+	log.Println(string(out))
 }

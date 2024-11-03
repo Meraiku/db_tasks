@@ -3,6 +3,7 @@ package helpers
 import (
 	"context"
 	"os"
+	"os/exec"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/meraiku/db_tasks/internal/repo/postgres_sqlc"
@@ -85,15 +86,11 @@ func InsertData(ctx context.Context) error {
 
 func ResetDB(ctx context.Context) error {
 
-	pool, err := pgxpool.New(ctx, os.Getenv("POSTGRES_DSN"))
-	if err != nil {
+	if err := exec.CommandContext(ctx, "make", "reset").Run(); err != nil {
 		return err
 	}
-	defer pool.Close()
 
-	queries := postgres_sqlc.New(pool)
-
-	if err := queries.ResetDB(ctx); err != nil {
+	if err := exec.CommandContext(ctx, "make", "up").Run(); err != nil {
 		return err
 	}
 
